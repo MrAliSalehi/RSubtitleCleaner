@@ -13,7 +13,7 @@ fn main() {
     let mut subtitlesInDir = Vec::new();
     GetSubtitlesInDirectory(&currentDir, &mut subtitlesInDir);
 
-    println!("{} '{}'", format!("Current Dir:").green(), currentDir);
+    println!("{} '{}'", "Current Dir:".green(), currentDir);
 
     for subtitle in subtitlesInDir {
         MoveSubtitle(subtitle);
@@ -24,7 +24,7 @@ fn GetStartingPath() -> String {
     let arg = env::args().nth(1);
 
     let currentDir;
-    if arg.is_none() {
+    if let Some(..) = arg {
         currentDir = env::current_dir().unwrap().to_str().unwrap().to_string();
     } else {
         currentDir = arg.unwrap();
@@ -56,11 +56,11 @@ fn MoveSubtitle(subtitle: DirEntry) {
     let subtitleFullPath = subtitlePathBuf.to_str().unwrap();
 
     let errCopyFile = format!("cant copy the file:[{}]", fileName).red();
-    std::fs::copy(&subtitleFullPath, format!("{}/{}", &subtitleDirectoryInParentDir, fileName))
+    std::fs::copy(subtitleFullPath, format!("{}/{}", &subtitleDirectoryInParentDir, fileName))
         .expect(&errCopyFile);
 
     let errRemoveFile = format!("could not remove the subtitle: {}", &subtitleFullPath).red();
-    std::fs::remove_file(&subtitleFullPath)
+    std::fs::remove_file(subtitleFullPath)
         .expect(&errRemoveFile);
 }
 
