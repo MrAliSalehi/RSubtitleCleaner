@@ -5,8 +5,11 @@ extern crate walkdir;
 use std::env;
 use std::path::{Path, PathBuf};
 
+use clap::Parser;
 use colored::Colorize;
 use walkdir::{DirEntry, WalkDir};
+
+use crate::argument::Args;
 
 mod argument;
 
@@ -18,9 +21,11 @@ mod argument;
 ///
 /// **foreach** subtitle found in given directory, call [`MoveSubtitle`] function and pass dawn the subtitle [path](DirEntry)
 fn main() {
-    let currentDir = GetStartingPath();
-    let mut subtitlesInDir = Vec::new();
-    GetSubtitlesInDirectory(&currentDir, &mut subtitlesInDir);
+    let args = Args::parse();
+
+    let currentDir = GetStartingPath(args.path);
+
+    let subtitlesInDir = GetSubtitlesInDirectory(&currentDir, args.extensions);
 
     println!("{} '{}'", "Current Dir:".green(), currentDir);
 
@@ -33,15 +38,12 @@ fn main() {
 /// this will try to get the **starting path** _(the path that program will start to scanning for subtitles)_.
 ///  - if it doesnt get any argument, it will use the [**current directory**](env::current_dir()) `(root directory of the application)`
 ///  - pass an argument like this : `./SubtitleCleaner /path/to/clean/`
-fn GetStartingPath() -> String {
-    let arg = env::args().nth(1);
-    let currentDir;
-    if let Some(..) = arg {
-        currentDir = env::current_dir().unwrap().to_str().unwrap().to_string();
+fn GetStartingPath(arg: String) -> String {
+    return if String::is_empty(&arg) {
+        env::current_dir().unwrap().to_str().unwrap().to_string()
     } else {
-        currentDir = arg.unwrap();
-    }
-    currentDir
+        arg
+    };
 }
 
 /// this will [walk](WalkDir) through the given directory(`dir` argument) **recursively**.
@@ -49,17 +51,24 @@ fn GetStartingPath() -> String {
 /// - - *.vtt
 /// - - *.srt
 /// **returns** a [`Vec<DirEntry>`] of all found subtitles.
-fn GetSubtitlesInDirectory(dir: &str, outList: &mut Vec<DirEntry>) {
+fn GetSubtitlesInDirectory(dir: &str, extensions: Vec<String>) -> Vec<DirEntry> {
+    let mut outList: Vec<DirEntry> = Vec::new();
+
     for file in WalkDir::new(dir)
         .into_iter()
         .filter_map(|f| f.ok())
         .filter(|f| f.metadata().unwrap().is_file())
     {
         let fileName = file.file_name().to_str().unwrap();
-        if fileName.ends_with(".vtt") || fileName.ends_with(".srt") {
-            outList.push(file);
+
+        for extension in &extensions {
+            if fileName.ends_with(extension) {
+                outList.push(file);
+                break;
+            }
         }
     }
+    outList
 }
 
 /// this will move the given subtitle(from path) to a sub-directory called **subs** in the parent directory.
