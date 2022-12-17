@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+
 extern crate walkdir;
 
 use std::env;
@@ -6,6 +7,8 @@ use std::path::{Path, PathBuf};
 
 use colored::Colorize;
 use walkdir::{DirEntry, WalkDir};
+
+mod argument;
 
 /// starting point of the application.
 ///
@@ -41,7 +44,7 @@ fn GetStartingPath() -> String {
     currentDir
 }
 
-/// this will [walk](walkdir::WalkDir) through the given directory(`dir` argument) **recursively**.
+/// this will [walk](WalkDir) through the given directory(`dir` argument) **recursively**.
 /// - fetch all the files with these formats:
 /// - - *.vtt
 /// - - *.srt
