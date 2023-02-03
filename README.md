@@ -1,2 +1,2 @@
 # RSubtitleCleaner
-clean subtitle in directories , powered by rust
+clean subtitles in a directory.
